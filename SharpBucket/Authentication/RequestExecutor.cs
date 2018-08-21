@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Deserializers;
+using RestSharp.Serializers;
+using RestSharp.Serializers.Newtonsoft.Json;
+using JsonSerializer = Newtonsoft.Json.JsonSerializer;
+using RestRequest = RestSharp.RestRequest;
 
 namespace SharpBucket.Authentication
 {
@@ -24,8 +29,16 @@ namespace SharpBucket.Authentication
 
             if (ShouldAddBody(method))
             {
+                var serializer = new NewtonsoftJsonSerializer(
+                    JsonSerializer.Create(
+                        new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore
+                        }));
+
+                request.JsonSerializer = serializer;
                 request.RequestFormat = DataFormat.Json;
-                request.AddObject(body);
+                request.AddBody(body);
             }
 
             //Fixed bug that prevents RestClient for adding custom headers to the request
